@@ -79,6 +79,8 @@
         <model:model model="shift" resource="model/shift.xml"/>
         <model:model model="shiftTimetableException" resource="model/shiftTimetableException.xml"/>
         <model:model model="product" resource="model/product.xml"/>
+        <model:model model="purchase" resource="model/purchase.xml"/>
+
         <model:model model="substitute" resource="model/substitute.xml"/>
         <model:model model="substituteComponent" resource="model/substituteComponent.xml"/>
         <model:model model="workstationType" resource="model/workstationType.xml"/>
@@ -142,6 +144,9 @@
         <menu:menu-item name="subassemblies" category="basic"
                         view="subassembliesList"/>
 
+        <menu:menu-item name="purchases" category="basic"
+                        view="purchasesList"/>                        
+        
         <view:view resource="view/reportColumnWidthDetails.xml"/>
         <view:view resource="view/companiesList.xml"/>
         <view:view resource="view/companyDetails.xml"/>
@@ -159,6 +164,9 @@
         <view:view resource="view/productsFamilies.xml"/>
         <view:view resource="view/productFamiliesAddProduct.xml"/>
 
+        <view:view resource="view/purchasesList.xml"/>
+        <view:view resource="view/purchaseDetails.xml"/>
+        
         <view:view resource="view/workstationTypesList.xml"/>
         <view:view resource="view/workstationTypeDetails.xml"/>
 
@@ -188,7 +196,7 @@
         </model:model-field>
         <model:model-hook plugin="qcadooSecurity" model="user">
             <model:validatesWith
-                    class="com.qcadoo.mes.basic.validators.UserValidators" method="onValidate"/>
+                class="com.qcadoo.mes.basic.validators.UserValidators" method="onValidate"/>
         </model:model-hook>
 
         <model:model-field model="unitConversionItem"
@@ -199,8 +207,8 @@
 
         <model:model-hook model="unitConversionItem" plugin="qcadooModel">
             <model:validatesWith
-                    class="com.qcadoo.mes.basic.hooks.UnitConversionItemValidatorsB"
-                    method="validateUnitOnConversionWithProduct"/>
+                class="com.qcadoo.mes.basic.hooks.UnitConversionItemValidatorsB"
+                method="validateUnitOnConversionWithProduct"/>
         </model:model-hook>
 
         <custom:custom class="com.qcadoo.mes.basic.BasicOnStartupService"/>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+***************************************************************************
+    Copyright (c) 2015 Kudlaty01
+    Project: Qcadoo MES Basic Plugin
+    Version: 1.3
+***************************************************************************    
+-->
+
+
+<model name="purchase" deletable="true" activable="true"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schema.qcadoo.org/model"
+       xsi:schemaLocation="http://schema.qcadoo.org/model http://schema.qcadoo.org/model.xsd">
+    <fields>
+        <belongsTo name="product" model="product" lazy="false"
+                   required="true" />
+        <decimal name="quantity">
+            <validatesRange from="0" exclusively="true" />
+        </decimal>
+        <decimal name="price">
+            <validatesRange from="0" exclusively="true" />
+            <validatesScale max="4" message="error.invalid.amount" />
+        </decimal>
+        <datetime name="date" required="true" />
+    </fields>
+    <hooks>
+        <validatesWith class="com.qcadoo.mes.basic.hooks.PurchaseHooks" method="checkIfNoSameProductAndPrice" />
+    </hooks>
+    
+    <identifier expression="#price + ' - ' + #date" />
+    
+</model>

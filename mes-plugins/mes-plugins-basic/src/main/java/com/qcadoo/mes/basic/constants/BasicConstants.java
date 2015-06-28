@@ -37,6 +37,8 @@ public final class BasicConstants {
     public static final String MODEL_PARAMETER = "parameter";
 
     public static final String MODEL_PRODUCT = "product";
+    
+    public static final String MODEL_PURCHASE = "purchase";
 
     public static final String MODEL_STAFF = "staff";
 
@@ -81,6 +83,10 @@ public final class BasicConstants {
     public static final String VIEW_PRODUCT_DETAILS = "productDetails";
 
     public static final String VIEW_PRODUCTS_LIST = "productsList";
+    
+    public static final String VIEW_PURCHASE_DETAILS = "purchaseDetails";
+
+    public static final String VIEW_PURCHASES_LIST = "purchasesList";
 
     public static final String VIEW_PRODUCT_SUBSTITUTE_COMPONENT_DETAILS = "productSubstituteComponentDetails";
 
