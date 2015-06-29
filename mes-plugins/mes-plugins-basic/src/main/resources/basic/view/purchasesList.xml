@@ -16,7 +16,7 @@
 
         <ribbon>
             <template name="standardGridTemplate"/>
-            <group name="conversions">
+            <group name="calculations">
                 <bigButton name="getAveragePriceOfAll" icon="genealogyIcon24.png">
                     <script>
 						<![CDATA[

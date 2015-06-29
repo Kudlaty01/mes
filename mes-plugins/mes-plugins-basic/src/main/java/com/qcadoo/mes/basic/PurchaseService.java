@@ -70,12 +70,14 @@ public class PurchaseService {
         scb.add(SearchRestrictions.belongsTo(PRODUCT, purchase.getBelongsToField(PRODUCT)));
         SearchResult result = scb.list();
         List<Entity> purchases = result.getEntities();
+        if(purchases.isEmpty())
+            return;
         BigDecimal sum = new BigDecimal(0);
         for (Entity purchaseEntity : purchases) {
+        purchaseForm.addMessage("basic.purchasesList.message.getAveragePriceOfProduct", ComponentState.MessageType.SUCCESS, purchaseEntity.getDecimalField("quantity").toString());
             sum = sum.add(purchaseEntity.getDecimalField(PRICE));
         }
         BigDecimal sResult = sum.divide(new BigDecimal(purchases.size()));
         purchaseForm.addMessage("basic.purchasesList.message.getAveragePriceOfProduct", ComponentState.MessageType.SUCCESS, sResult.toString());
-        state.performEvent(view, "reset", new String[0]);
     }
 }
