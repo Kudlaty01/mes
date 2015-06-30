@@ -33,17 +33,33 @@
             <component type="gridLayout" name="gridLayout" columns="3"
                        rows="4">
                 <layoutElement column="1" row="1">
-                    <component type="lookup" name="product" field="product" reference="workFor" >
+                    <component type="lookup" name="product" field="product" reference="product">
                         <option type="searchable" value="name" />
                         <option type="orderable" value="name" />
 						
-                        <option type="expression" value="#product['number'] + ' - ' + #product['name']" />
-                        <option type="fieldCode" value="number" />
+                        <option type="expression" value="#number + ' - ' + #name" />
+                        <option type="fieldCode" value="name" />
+                        <listener event="onSelectedEntityChange"
+						class="com.qcadoo.mes.basic.listeners.PurchaseDetailsListener"
+						method="fillFieldAboutUnit" />
                     </component>
                 </layoutElement>
                 <layoutElement column="1" row="2">
-                    <component type="input" name="quantity" field="quantity" />
-                    <!--                    <component type="input" name="unit" field="#{product}.unit" defaultEnabled="never" hasLabel="false"/>-->
+                    <component type="gridLayout" name="gridLayoutPurchasesQuantity" columns="4"
+                               rows="1" hasBorders="false">
+                        <layoutElement column="1" row="1" width="3">
+                            <component type="input" name="quantity" field="quantity">
+                                <option type="labelWidth" value="40" />
+                                <option type="alignment" value="right" />
+                            </component>
+                        </layoutElement>
+                        <layoutElement column="4" row="1">
+                            <component type="input" name="productUnit" reference="productUnit"
+                                       hasLabel="false" defaultEnabled="false">
+                                <option type="alignment" value="right" />
+                            </component>
+                        </layoutElement>
+                    </component>
                 </layoutElement>
                 <layoutElement column="1" row="3">
                     <component type="input" name="price" field="price" />
