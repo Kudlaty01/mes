@@ -14,14 +14,16 @@ import com.qcadoo.model.api.DataDefinition;
 import com.qcadoo.model.api.DataDefinitionService;
 import com.qcadoo.model.api.Entity;
 import com.qcadoo.model.api.search.SearchCriteriaBuilder;
+import com.qcadoo.model.api.search.SearchOrders;
+import com.qcadoo.model.api.search.SearchProjection;
 import com.qcadoo.model.api.search.SearchProjections;
 import com.qcadoo.model.api.search.SearchRestrictions;
-import com.qcadoo.model.api.search.SearchResult;
 import com.qcadoo.view.api.ComponentState;
 import com.qcadoo.view.api.ViewDefinitionState;
 import com.qcadoo.view.api.components.FormComponent;
 import com.qcadoo.view.api.components.GridComponent;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ public class PurchaseService {
 
     private static final String L_FORM = "form";
 
+    private static final String AVG_PRICE_PROJECTION_ALIAS = "avgPriceProjection";
+
     @Autowired
     private DataDefinitionService dataDefinitionService;
 
@@ -44,40 +48,46 @@ public class PurchaseService {
 
     public void getAveragePriceOfAll(final ViewDefinitionState view, final ComponentState state, final String[] args) {
         final GridComponent purchasesGrid = (GridComponent) view.getComponentByReference("grid");
-
-        final List<Entity> purchases = purchasesGrid.getEntities();
-        if (purchases.isEmpty()) {
+        List<Entity> selectedPurchases = purchasesGrid.getSelectedEntities();
+        
+        if (!selectedPurchases.isEmpty()) {
+            
+            BigDecimal average = selectedPurchases.stream().map(x->x.getDecimalField(PRICE)).reduce(BigDecimal.ZERO, (a,b)->a.add(b)).divide(new BigDecimal(selectedPurchases.size()),4,RoundingMode.HALF_UP);
+            purchasesGrid.addMessage("basic.purchasesList.message.getAveragePricesSelected", ComponentState.MessageType.SUCCESS, average.toString());
+            
+        } else {
+            SearchCriteriaBuilder scb = getPurchaseDD().find();
+            SearchProjection average = SearchProjections.alias(SearchProjections.avg(PRICE),
+                    AVG_PRICE_PROJECTION_ALIAS);
+            scb.setProjection(SearchProjections.list().add(average));
+            // for compatibility purposes (projection error)
+            scb.addOrder(SearchOrders.asc(AVG_PRICE_PROJECTION_ALIAS));
+            Entity avgPrice = scb.setMaxResults(1).uniqueResult();
+            purchasesGrid.addMessage("basic.purchasesList.message.getAveragePricesAll", ComponentState.MessageType.SUCCESS, avgPrice.getField(AVG_PRICE_PROJECTION_ALIAS).toString());
         }
 
-        BigDecimal sum = new BigDecimal(0);
-        for (Entity purchase : purchases) {
-            sum = sum.add(purchase.getDecimalField(PRICE));
-        }
-        BigDecimal result = sum.divide(new BigDecimal(purchases.size()));
-        purchasesGrid.addMessage("basic.purchasesList.message.getAveragePricesAll", ComponentState.MessageType.SUCCESS, result.toString());
     }
 
     public void getAveragePriceOfProduct(final ViewDefinitionState view, final ComponentState state, final String[] args) {
         final FormComponent purchaseForm = (FormComponent) view.getComponentByReference(L_FORM);
+
         if (purchaseForm.getEntityId() == null) {
             return;
         }
 
         final Entity purchase = purchaseForm.getEntity();
-
-        SearchCriteriaBuilder scb = purchase.getDataDefinition().find();
-        scb.setProjection(SearchProjections.id());
-        scb.add(SearchRestrictions.belongsTo(PRODUCT, purchase.getBelongsToField(PRODUCT)));
-        SearchResult result = scb.list();
-        List<Entity> purchases = result.getEntities();
-        if(purchases.isEmpty())
-            return;
-        BigDecimal sum = new BigDecimal(0);
-        for (Entity purchaseEntity : purchases) {
-        purchaseForm.addMessage("basic.purchasesList.message.getAveragePriceOfProduct", ComponentState.MessageType.SUCCESS, purchaseEntity.getDecimalField("quantity").toString());
-            sum = sum.add(purchaseEntity.getDecimalField(PRICE));
-        }
-        BigDecimal sResult = sum.divide(new BigDecimal(purchases.size()));
-        purchaseForm.addMessage("basic.purchasesList.message.getAveragePriceOfProduct", ComponentState.MessageType.SUCCESS, sResult.toString());
+        Entity product = purchase.getBelongsToField(PRODUCT);
+        Object result = CalculateAverageProductPrice(product);
+        purchaseForm.addMessage("basic.purchasesList.message.getAveragePriceOfProduct", ComponentState.MessageType.SUCCESS, result.toString());
+    }
+    
+    public Object CalculateAverageProductPrice(final Entity product){
+        SearchProjection average = SearchProjections.alias(SearchProjections.avg(PRICE),
+                AVG_PRICE_PROJECTION_ALIAS);
+        SearchCriteriaBuilder scb = getPurchaseDD().find().setProjection(SearchProjections.list().add(average));
+        scb.add(SearchRestrictions.belongsTo(PRODUCT, product));
+        scb.addOrder(SearchOrders.asc(AVG_PRICE_PROJECTION_ALIAS));
+        Entity avgPrice = scb.setMaxResults(1).uniqueResult();
+        return avgPrice.getField(AVG_PRICE_PROJECTION_ALIAS);
     }
 }
